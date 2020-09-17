@@ -3,9 +3,8 @@
 
 const store = {
   state: {
-    welcomeMessage: '<h1>Welcome to know your Colors</h1><button class="startBtn">Start Quiz</button>',
-    welcomePage: true,
-    quizPage: false,
+    quiz: false,
+    endPage: false,
     correct: 0,
     wrong: 0,
     indexCount: 0,
@@ -39,10 +38,7 @@ const store = {
   ]
 };
 
-let quizHtml;
-let answerHtml;
 
-// Welcome function to render welcome html
 
 // start button handler
 
@@ -70,72 +66,90 @@ let answerHtml;
 /********** TEMPLATE GENERATION FUNCTIONS **********/
 
 // These functions return HTML templates
+// start page
+const startPage = () => {
+  return '<h2>Welcome to Know Your Colors!</h2><button class="startBtn">Start Quiz!</button>';
+};
+// question and answer form generator
 
-const questionGenerateHtml = (obj, answers) => {
-  return `<h2>${obj.question}</h2>
+const questionTemplate = (q) => {
+  let answers = q.answers.map((answer) => {
+    return `<input type='radio' class='answerBtn' name="answerButton" value='${answer}' required><label for="${answer}">${answer}</label>`;
+  }).join('');
+  return `
+          <h2>${q.question}</h2>
           <form>
           ${answers}
-          </form>`;
+          <input type='submit' value='submit'/>
+          </form>
+          ${scoreBoardTemplate()}`;
 };
 
-const answerGenerateHTML = (obj) => {
-  return obj.answers.map((a) => {
-    return `<input type='submit' class='answerBtn' value='${a}'>`;
-  }).join('');
+const scoreBoardTemplate = () => {
+  return `<h3>Wrong: ${store.state.wrong}, Question Number: ${store.state.indexCount + 1}</h3>`;
 };
 
-const endScreenHTML = () => {
-  return '<h3>The End</h3>';
+const endGameTemplate = () => {
+  return `<h2>Congratulations</h2>
+          <p>You got ${store.state.indexCount - store.state.wrong} correct!</p><p>Would you like to play again?</p><button class="retry">Try Again</button>`;
 };
 
 /********** RENDER FUNCTION(S) **********/
 
 // This function conditionally replaces the contents of the <main> tag based on the state of the store
-const render = () => {
-  if (store.state.welcomePage) {
-    $('main').html(store.state.welcomeMessage);
-  } else if (store.state.quizPage && !store.state.welcomePage) {
-    if (store.state.indexCount < store.questions.length) {
-      answerHtml = answerGenerateHTML(store.questions[store.state.indexCount]);
-      quizHtml = questionGenerateHtml(store.questions[store.state.indexCount], answerHtml);
-
-      $('main').html(quizHtml);
-    }
-  } else if (store.state.questionCount > store.questions.length) {
-    $('main').html(endScreenHTML());
+function render() {
+  if (!store.state.quiz) {
+    $('main').html(startPage());
+  } else if (store.state.quiz && store.state.indexCount !== store.questions.length) {
+    $('main').html(questionTemplate(store.questions[store.state.indexCount]));
+  } else if (store.state.indexCount === store.questions.length) {
+    $('main').html(endGameTemplate());
   }
-};
+}
 
 
 /********** EVENT HANDLER FUNCTIONS **********/
 // These functions handle events (submit, click, etc)
-const answerHandler = () => {
-  $('main').on('click', '.answerBtn', (e) => {
-    e.preventDefault();
-    console.log($(e.currentTarget).val());
-    store.state.indexCount++;
-    render();
-  });
-
-};
 
 const startHandler = () => {
   $('.startBtn').click(() => {
-    store.state.welcomePage = false;
-    store.state.quizPage = true;
+    store.state.quiz = true;
     render();
   });
 };
 
-const welcome = () => {
-  render();
-  startHandler();
+const answerCheckHandler = () => {
+  $('body').on('submit', 'form', function (e) {
+    e.preventDefault();
+    let answer = $('input[class="answerBtn"]:checked').val();
+    if (answer === store.questions[store.state.indexCount].correctAnswer) {
+      store.state.indexCount++;
+      render();
+    } else {
+      store.state.wrong++;
+      store.state.indexCount++;
+      render();
+    }
+    render();
+  });
 };
 
+const retryHandler = () => {
+  $('body').on('click', '.retry', () => {
+    store.state.quiz = false;
+    store.state.endPage = false;
+    store.state.correct = 0;
+    store.state.wrong = 0;
+    store.state.indexCount = 0;
+    render();
+  });
+};
 
 const main = () => {
-  answerHandler();
-  welcome();
+  render();
+  startHandler();
+  answerCheckHandler();
+  retryHandler();
 };
 
 
