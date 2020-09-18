@@ -88,7 +88,7 @@ const questionTemplate = (q) => {
 };
 
 const scoreBoardTemplate = () => {
-  return `<h3>Wrong: ${store.state.wrong}, Question Number: ${store.state.indexCount + 1}</h3>`;
+  return `<h3>Wrong: ${store.state.wrong}, Question Number: ${store.state.indexCount + 1} out of ${store.questions.length}</h3>`;
 };
 
 const endGameTemplate = () => {
@@ -96,9 +96,6 @@ const endGameTemplate = () => {
           <p>You got ${store.state.indexCount - store.state.wrong} correct!</p><p>Would you like to play again?</p><button class="retry">Try Again</button>`;
 };
 
-const wrongAnswerTemplate = (q) => {
-  return `<p>Correct answer was ${q.correctAnswer}`;
-}
 
 /********** RENDER FUNCTION(S) **********/
 
@@ -111,6 +108,7 @@ function render() {
   } else if (store.state.indexCount === store.questions.length) {
     $('main').html(endGameTemplate());
   }
+  // render(wrongAnswerTemplate(store.questions[store.state.indexCount]));
 }
 
 
