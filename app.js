@@ -1,35 +1,52 @@
-/**
- * Example store structure
- */
+/* global $ */
 'use strict';
+
 const store = {
-  // 5 or more questions are required
+  state: {
+    quiz: false,
+    endPage: false,
+    correct: 0,
+    wrong: 0,
+    indexCount: 0,
+  },
   questions: [
     {
-      question: 'What color is broccoli?',
-      answers: [
-        'red',
-        'orange',
-        'pink',
-        'green'
-      ],
-      correctAnswer: 'green'
+      question: 'What color mixing makes  Orange?',
+      answers: ['Red and Yellow', 'Pink and Green', 'Green and Yellow'],
+      correctAnswer: 'Red and Yellow'
     },
     {
-      question: 'What is the current year?',
-      answers: [
-        '1970',
-        '2015',
-        '2019',
-        '2005'
-      ],
-      correctAnswer: '2019'
+      question: 'What color mixing makes Purple?',
+      answers: ['Purple and Yellow', 'Blue and Red', 'Pink and Yellow'],
+      correctAnswer: 'Blue and Red'
+    },
+    {
+      question: 'What color mixing makes Green?',
+      answers: ['White and Yellow', 'Black and Red', 'Blue and Yellow'],
+      correctAnswer: 'Blue and Yellow'
+    },
+    {
+      question: 'What color mixing makes Gray?',
+      answers: ['White and Brown', 'White and Black', 'Black and Gray'],
+      correctAnswer: 'White and Black'
+    },
+    {
+      question: 'What color mixing makes Pink?',
+      answers: ['White and Orange', 'White and Yellow', 'White and Red'],
+      correctAnswer: 'White and Red'
     }
-  ],
-  quizStarted: false,
-  questionNumber: 0,
-  score: 0
+  ]
 };
+
+
+
+// start button handler
+
+
+// a function for the questions and answers that utilizes a template string
+
+
+//! answers must be in a form
 
 /**
  *
@@ -48,12 +65,98 @@ const store = {
 
 /********** TEMPLATE GENERATION FUNCTIONS **********/
 
-  // These functions return HTML templates
+// These functions return HTML templates
+// start page
+const startPage = () => {
+  return '<button class="startBtn">Start Quiz!</button>';
+};
+// question and answer form generator
+
+const questionTemplate = (q) => {
+  let answers = q.answers.map((answer) => {
+    return `<li><label for="${answer}"><input type='radio' class='answerBtn' name="answerButton" value='${answer}' required>${answer}</label></li>`;
+  }).join('');
+  return `
+          <h2>${q.question}</h2>
+          <form>
+          <ul>
+          ${answers}
+          </ul>
+          <input type='submit' value='submit'/>
+          </form>
+          ${scoreBoardTemplate()}`;
+};
+
+const scoreBoardTemplate = () => {
+  return `<h3>Wrong: ${store.state.wrong}, Question Number: ${store.state.indexCount + 1}</h3>`;
+};
+
+const endGameTemplate = () => {
+  return `<h2>Congratulations</h2>
+          <p>You got ${store.state.indexCount - store.state.wrong} correct!</p><p>Would you like to play again?</p><button class="retry">Try Again</button>`;
+};
+
+const wrongAnswerTemplate = (q) => {
+  return `<p>Correct answer was ${q.correctAnswer}`;
+}
 
 /********** RENDER FUNCTION(S) **********/
 
-  // This function conditionally replaces the contents of the <main> tag based on the state of the store
+// This function conditionally replaces the contents of the <main> tag based on the state of the store
+function render() {
+  if (!store.state.quiz) {
+    $('main').html(startPage());
+  } else if (store.state.quiz && store.state.indexCount !== store.questions.length) {
+    $('main').html(questionTemplate(store.questions[store.state.indexCount]));
+  } else if (store.state.indexCount === store.questions.length) {
+    $('main').html(endGameTemplate());
+  }
+}
+
 
 /********** EVENT HANDLER FUNCTIONS **********/
+// These functions handle events (submit, click, etc)
 
-  // These functions handle events (submit, click, etc)
+const startHandler = () => {
+  $('.startBtn').click(() => {
+    store.state.quiz = true;
+    render();
+  });
+};
+
+const answerCheckHandler = () => {
+  $('body').on('submit', 'form', function (e) {
+    e.preventDefault();
+    let answer = $('input[class="answerBtn"]:checked').val();
+    if (answer === store.questions[store.state.indexCount].correctAnswer) {
+      store.state.indexCount++;
+      render();
+    } else {
+      store.state.wrong++;
+      store.state.indexCount++;
+      render();
+    }
+    render();
+  });
+};
+
+const retryHandler = () => {
+  $('body').on('click', '.retry', () => {
+    store.state.quiz = true;
+    store.state.endPage = false;
+    store.state.correct = 0;
+    store.state.wrong = 0;
+    store.state.indexCount = 0;
+    render();
+  });
+};
+
+const main = () => {
+  render();
+  startHandler();
+  answerCheckHandler();
+  retryHandler();
+};
+
+
+$(main);
