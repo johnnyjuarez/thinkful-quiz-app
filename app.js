@@ -68,18 +68,20 @@ const store = {
 // These functions return HTML templates
 // start page
 const startPage = () => {
-  return '<h2>Welcome to Know Your Colors!</h2><button class="startBtn">Start Quiz!</button>';
+  return '<button class="startBtn">Start Quiz!</button>';
 };
 // question and answer form generator
 
 const questionTemplate = (q) => {
   let answers = q.answers.map((answer) => {
-    return `<input type='radio' class='answerBtn' name="answerButton" value='${answer}' required><label for="${answer}">${answer}</label>`;
+    return `<li><label for="${answer}"><input type='radio' class='answerBtn' name="answerButton" value='${answer}' required>${answer}</label></li>`;
   }).join('');
   return `
           <h2>${q.question}</h2>
           <form>
+          <ul>
           ${answers}
+          </ul>
           <input type='submit' value='submit'/>
           </form>
           ${scoreBoardTemplate()}`;
@@ -93,6 +95,10 @@ const endGameTemplate = () => {
   return `<h2>Congratulations</h2>
           <p>You got ${store.state.indexCount - store.state.wrong} correct!</p><p>Would you like to play again?</p><button class="retry">Try Again</button>`;
 };
+
+const wrongAnswerTemplate = (q) => {
+  return `<p>Correct answer was ${q.correctAnswer}`;
+}
 
 /********** RENDER FUNCTION(S) **********/
 
@@ -136,7 +142,7 @@ const answerCheckHandler = () => {
 
 const retryHandler = () => {
   $('body').on('click', '.retry', () => {
-    store.state.quiz = false;
+    store.state.quiz = true;
     store.state.endPage = false;
     store.state.correct = 0;
     store.state.wrong = 0;
