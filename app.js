@@ -87,11 +87,11 @@ const questionTemplate = (q) => {
 };
 
 const wrongAnswerTemplate = () => {
-  return `<p class="wrong">The correct answer is ${store.questions[store.state.indexCount].correctAnswer}</p><button class="continueBtn">Continue</button>`;
+  return `<p class="wrong">The correct answer is ${store.questions[store.state.indexCount].correctAnswer} <span class="redX">✘</span></p><button class="continueBtn">Continue</button>`;
 };
 
 const correctAnswerTemplate = () => {
-  return '<p class="correct">Woohoo! Correct!</p><button class="continueBtn">Continue</button>';
+  return '<p class="correct">Woohoo! Correct! <span class="checkmark">✓</span></p><button class="continueBtn">Continue</button>';
 };
 
 const scoreBoardTemplate = () => {
