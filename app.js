@@ -1,5 +1,4 @@
 /* global $ */
-'use strict';
 
 const store = {
   state: {
@@ -87,13 +86,21 @@ const questionTemplate = (q) => {
           ${scoreBoardTemplate()}`;
 };
 
+const wrongAnswerTemplate = () => {
+  return `<p class="wrong">The correct answer is ${store.questions[store.state.indexCount].correctAnswer}</p><button class="continueBtn">Continue</button>`;
+};
+
+const correctAnswerTemplate = () => {
+  return '<p class="correct">Woohoo! Correct!</p><button class="continueBtn">Continue</button>';
+};
+
 const scoreBoardTemplate = () => {
-  return `<h3>Wrong: ${store.state.wrong}, Question Number: ${store.state.indexCount + 1} out of ${store.questions.length}</h3>`;
+  return `<h3>You currently have ${store.state.correct} correct.</h3><p>${store.questions.length - store.state.indexCount} questions remaining.`;
 };
 
 const endGameTemplate = () => {
   return `<h2>Congratulations</h2>
-          <p>You got ${store.state.indexCount - store.state.wrong} correct!</p><p>Would you like to play again?</p><button class="retry">Try Again</button>`;
+          <p>You got ${store.state.correct / store.questions.length * 100}% correct!</p><p>Would you like to play again?</p><button class="retry">Try Again</button>`;
 };
 
 
@@ -108,9 +115,15 @@ function render() {
   } else if (store.state.indexCount === store.questions.length) {
     $('main').html(endGameTemplate());
   }
-  // render(wrongAnswerTemplate(store.questions[store.state.indexCount]));
 }
 
+function renderWrongAnswer() {
+  $('main').html(wrongAnswerTemplate());
+}
+
+function renderCorrectAnswer() {
+  $('main').html(correctAnswerTemplate());
+}
 
 /********** EVENT HANDLER FUNCTIONS **********/
 // These functions handle events (submit, click, etc)
@@ -128,12 +141,20 @@ const answerCheckHandler = () => {
     let answer = $('input[class="answerBtn"]:checked').val();
     if (answer === store.questions[store.state.indexCount].correctAnswer) {
       store.state.indexCount++;
-      render();
+      store.state.correct++;
+      renderCorrectAnswer();
     } else {
+      renderWrongAnswer();
       store.state.wrong++;
       store.state.indexCount++;
-      render();
+
     }
+    // render();
+  });
+};
+
+const continueHandler = () => {
+  $('body').on('click', '.continueBtn', () => {
     render();
   });
 };
@@ -154,6 +175,7 @@ const main = () => {
   startHandler();
   answerCheckHandler();
   retryHandler();
+  continueHandler();
 };
 
 
